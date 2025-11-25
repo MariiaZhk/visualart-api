@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: init
+      author: maria
+      changes:
+        - createTable:
+            tableName: example_init_table
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
