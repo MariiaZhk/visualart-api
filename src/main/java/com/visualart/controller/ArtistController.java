@@ -2,9 +2,14 @@ package com.visualart.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.visualart.entity.Artist;
 import com.visualart.service.ArtistService;
@@ -20,16 +25,13 @@ public class ArtistController {
     }
 
     @PostMapping
-    public ResponseEntity<Artist> createArtist(@RequestBody Artist artist) {
-        Artist savedArtist = artistService.createArtist(artist);
-        return new ResponseEntity<>(savedArtist, HttpStatus.CREATED);
+    public Artist createArtist(@RequestBody Artist artist) {
+        return artistService.createArtist(artist);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Artist> getArtistById(@PathVariable Long id) {
-        return artistService.getArtistById(id)
-                .map(artist -> new ResponseEntity<>(artist, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public Artist getArtistById(@PathVariable Long id) {
+        return artistService.getArtistById(id);
     }
 
     @GetMapping
@@ -38,18 +40,12 @@ public class ArtistController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Artist> updateArtist(@PathVariable Long id, @RequestBody Artist artist) {
-        try {
-            Artist updatedArtist = artistService.updateArtist(id, artist);
-            return new ResponseEntity<>(updatedArtist, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public Artist updateArtist(@PathVariable Long id, @RequestBody Artist artist) {
+        return artistService.updateArtist(id, artist);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteArtist(@PathVariable Long id) {
+    public void deleteArtist(@PathVariable Long id) {
         artistService.deleteArtist(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

@@ -1,9 +1,9 @@
 package com.visualart.controller;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +13,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.opencsv.CSVWriter;
+import com.visualart.dto.ArtworkListRequest;
+import com.visualart.dto.ArtworkListResponse;
 import com.visualart.entity.Artwork;
+import com.visualart.exception.ResourceNotFoundException;
 import com.visualart.service.ArtworkService;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api/artwork")
@@ -27,16 +33,13 @@ public class ArtworkController {
     }
 
     @PostMapping
-    public ResponseEntity<Artwork> createArtwork(@RequestBody Artwork artwork) {
-        Artwork savedArtwork = artworkService.createArtwork(artwork);
-        return new ResponseEntity<>(savedArtwork, HttpStatus.CREATED);
+    public Artwork createArtwork(@RequestBody Artwork artwork) {
+        return artworkService.createArtwork(artwork);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Artwork> getArtworkById(@PathVariable Long id) {
-        return artworkService.getArtworkById(id)
-                .map(artwork -> new ResponseEntity<>(artwork, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public Artwork getArtworkById(@PathVariable Long id) {
+        return artworkService.getArtworkById(id);
     }
 
     @GetMapping
@@ -45,18 +48,54 @@ public class ArtworkController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Artwork> updateArtwork(@PathVariable Long id, @RequestBody Artwork artwork) {
-        try {
-            Artwork updatedArtwork = artworkService.updateArtwork(id, artwork);
-            return new ResponseEntity<>(updatedArtwork, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public Artwork updateArtwork(@PathVariable Long id, @RequestBody Artwork artwork) {
+        return artworkService.updateArtwork(id, artwork);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteArtwork(@PathVariable Long id) {
+    public void deleteArtwork(@PathVariable Long id) {
         artworkService.deleteArtwork(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/_list")
+    public ArtworkListResponse listArtworks(@RequestBody ArtworkListRequest request) {
+        return artworkService.getPaginatedArtworks(request);
+    }
+
+    @PostMapping("/_report")
+    public void reportArtworks(@RequestBody ArtworkListRequest request, HttpServletResponse response) throws IOException {
+        List<Artwork> artworks = artworkService.getFilteredArtworks(request);
+
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment; filename=\"artworks_report.csv\"");
+
+        try (CSVWriter writer = new CSVWriter(response.getWriter())) {
+            writer.writeNext(new String[]{"ID", "Title", "Year", "Artist"});
+            for (Artwork a : artworks) {
+                writer.writeNext(new String[]{
+                        a.getId().toString(),
+                        a.getTitle(),
+                        a.getYearCreated() != null ? a.getYearCreated().toString() : "",
+                        a.getArtist().getName()
+                });
+            }
+        }
+    }
+
+    @PostMapping("/upload")
+    public Map<String, Integer> uploadArtworks(@RequestBody List<Artwork> artworks) {
+        int success = 0;
+        int failed = 0;
+
+        for (Artwork artwork : artworks) {
+            try {
+                artworkService.createArtwork(artwork);
+                success++;
+            } catch (ResourceNotFoundException e) {
+                failed++;
+            }
+        }
+
+        return Map.of("success", success, "failed", failed);
     }
 }
