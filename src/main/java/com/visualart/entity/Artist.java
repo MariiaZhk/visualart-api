@@ -18,7 +18,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "artist")
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Artist {
@@ -27,6 +28,7 @@ public class Artist {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String name;
 
     private Integer birthYear;

@@ -72,8 +72,86 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_artist_schools_artist
 
+  # Початкові записи для Artist
   - changeSet:
-      id: 004-create-artwork-table
+      id: 004-insert-initial-artists
+      author: maria
+      changes:
+        - insert:
+            tableName: artist
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 1
+              - column:
+                  name: name
+                  value: "Vincent van Gogh"
+              - column:
+                  name: birth_year
+                  valueNumeric: 1853
+              - column:
+                  name: death_year
+                  valueNumeric: 1890
+              - column:
+                  name: nationality
+                  value: "Dutch"
+        - insert:
+            tableName: artist
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 2
+              - column:
+                  name: name
+                  value: "Claude Monet"
+              - column:
+                  name: birth_year
+                  valueNumeric: 1840
+              - column:
+                  name: death_year
+                  valueNumeric: 1926
+              - column:
+                  name: nationality
+                  value: "French"
+        - insert:
+            tableName: artist_fields
+            columns:
+              - column:
+                  name: artist_id
+                  valueNumeric: 1
+              - column:
+                  name: field
+                  value: "Painting"
+        - insert:
+            tableName: artist_fields
+            columns:
+              - column:
+                  name: artist_id
+                  valueNumeric: 2
+              - column:
+                  name: field
+                  value: "Painting"
+        - insert:
+            tableName: artist_schools
+            columns:
+              - column:
+                  name: artist_id
+                  valueNumeric: 1
+              - column:
+                  name: school
+                  value: "Post-Impressionism"
+        - insert:
+            tableName: artist_schools
+            columns:
+              - column:
+                  name: artist_id
+                  valueNumeric: 2
+              - column:
+                  name: school
+                  value: "Impressionism"
+
+  - changeSet:
+      id: 005-create-artwork-table
       author: maria
       changes:
         - createTable:
@@ -106,7 +184,7 @@ databaseChangeLog:
             constraintName: fk_artwork_artist
 
   - changeSet:
-      id: 005-create-artwork-genres
+      id: 006-create-artwork-genres
       author: maria
       changes:
         - createTable:
@@ -128,7 +206,7 @@ databaseChangeLog:
             constraintName: fk_artwork_genres_artwork
 
   - changeSet:
-      id: 006-create-artwork-media
+      id: 007-create-artwork-media
       author: maria
       changes:
         - createTable:

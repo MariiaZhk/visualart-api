@@ -19,7 +19,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "artwork")
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Artwork {
@@ -28,6 +29,7 @@ public class Artwork {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
 
     private Integer yearCreated;
