@@ -1,8 +1,12 @@
+server:
+  port: 8080
+
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/visualartdb
+    url: jdbc:postgresql://postgres:5432/visualartdb
     username: visualartuser
     password: visualartpass
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: none
@@ -10,5 +14,8 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
-server:
-  port: 8080
+management:
+  endpoints:
+    web:
+      exposure:
+        include: env,health,info
