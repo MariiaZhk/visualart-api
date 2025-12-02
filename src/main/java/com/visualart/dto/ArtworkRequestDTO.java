@@ -1,10 +1,10 @@
 package com.visualart.dto;
 
 import java.util.List;
-import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
+import lombok.Data;
+//DTO
 @Data
 public class ArtworkRequestDTO {
     @NotBlank(message = "Title is required")

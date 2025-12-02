@@ -2,46 +2,40 @@ package com.visualart.controller;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.visualart.entity.Artist;
+import com.visualart.dto.ArtistRequestDTO;
+import com.visualart.dto.ArtistResponseDTO;
 import com.visualart.service.ArtistService;
 
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+// ControllerArtist
 @RestController
 @RequestMapping("/api/artist")
+@RequiredArgsConstructor
 public class ArtistController {
 
     private final ArtistService artistService;
 
-    public ArtistController(ArtistService artistService) {
-        this.artistService = artistService;
-    }
-
     @PostMapping
-    public Artist createArtist(@RequestBody Artist artist) {
-        return artistService.createArtist(artist);
+    public ArtistResponseDTO createArtist(@Valid @RequestBody ArtistRequestDTO dto) {
+        return artistService.createArtist(dto);
     }
 
     @GetMapping("/{id}")
-    public Artist getArtistById(@PathVariable Long id) {
+    public ArtistResponseDTO getArtistById(@PathVariable Long id) {
         return artistService.getArtistById(id);
     }
 
     @GetMapping
-    public List<Artist> getAllArtists() {
+    public List<ArtistResponseDTO> getAllArtists() {
         return artistService.getAllArtists();
     }
 
     @PutMapping("/{id}")
-    public Artist updateArtist(@PathVariable Long id, @RequestBody Artist artist) {
-        return artistService.updateArtist(id, artist);
+    public ArtistResponseDTO updateArtist(@PathVariable Long id, @Valid @RequestBody ArtistRequestDTO dto) {
+        return artistService.updateArtist(id, dto);
     }
 
     @DeleteMapping("/{id}")

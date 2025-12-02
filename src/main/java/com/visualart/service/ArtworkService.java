@@ -1,7 +1,6 @@
 package com.visualart.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -9,92 +8,80 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.visualart.dto.ArtworkListRequest;
-import com.visualart.dto.ArtworkListResponse;
-import com.visualart.dto.ArtworkShortDTO;
+import com.visualart.dto.*;
 import com.visualart.entity.Artist;
 import com.visualart.entity.Artwork;
 import com.visualart.exception.ResourceNotFoundException;
+import com.visualart.mapper.ArtworkMapper;
 import com.visualart.repository.ArtistRepository;
 import com.visualart.repository.ArtworkRepository;
 
 import jakarta.persistence.criteria.Predicate;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 @Transactional
 public class ArtworkService {
 
     private final ArtworkRepository artworkRepository;
     private final ArtistRepository artistRepository;
 
-    public ArtworkService(ArtworkRepository artworkRepository, ArtistRepository artistRepository) {
-        this.artworkRepository = artworkRepository;
-        this.artistRepository = artistRepository;
+    // Create
+    public ArtworkResponseDTO createArtwork(ArtworkRequestDTO dto) {
+        Artist artist = artistRepository.findById(dto.getArtistId())
+                .orElseThrow(() -> new ResourceNotFoundException("Artist", dto.getArtistId()));
+        Artwork artwork = ArtworkMapper.fromRequestDTO(dto, artist);
+        return ArtworkMapper.toDTO(artworkRepository.save(artwork));
     }
 
-    // ================= CRUD =================
-    public Artwork createArtwork(Artwork artwork) {
-        prepareArtworkForSave(artwork);
-        return artworkRepository.save(artwork);
-    }
-
-    public Artwork getArtworkById(Long id) {
+    // Read by ID
+    public ArtworkResponseDTO getArtworkById(Long id) {
         return artworkRepository.findById(id)
+                .map(ArtworkMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Artwork", id));
     }
 
-    public List<Artwork> getAllArtworks() {
-        return artworkRepository.findAll();
+    // Read all
+    public List<ArtworkResponseDTO> getAllArtworks() {
+        return artworkRepository.findAll().stream()
+                .map(ArtworkMapper::toDTO)
+                .toList();
     }
 
-    public Artwork updateArtwork(Long id, Artwork updatedArtwork) {
-        Artwork artwork = getArtworkById(id);
-        prepareArtworkForSave(updatedArtwork);
-
-        artwork.setTitle(updatedArtwork.getTitle());
-        artwork.setYearCreated(updatedArtwork.getYearCreated());
-        artwork.setGenres(updatedArtwork.getGenres());
-        artwork.setMedia(updatedArtwork.getMedia());
-        artwork.setArtist(updatedArtwork.getArtist());
-
-        return artworkRepository.save(artwork);
+    // Update
+    public ArtworkResponseDTO updateArtwork(Long id, ArtworkRequestDTO dto) {
+        Artwork artwork = artworkRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Artwork", id));
+        Artist artist = artistRepository.findById(dto.getArtistId())
+                .orElseThrow(() -> new ResourceNotFoundException("Artist", dto.getArtistId()));
+        ArtworkMapper.updateEntity(artwork, dto, artist);
+        return ArtworkMapper.toDTO(artworkRepository.save(artwork));
     }
 
+    // Delete
     public void deleteArtwork(Long id) {
-        Artwork artwork = getArtworkById(id);
+        Artwork artwork = artworkRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Artwork", id));
         artworkRepository.delete(artwork);
     }
 
-    // ================= Приватні методи =================
-    private void prepareArtworkForSave(Artwork artwork) {
-        if (artwork.getArtist() == null || artwork.getArtist().getId() == null) {
-            throw new ResourceNotFoundException("Artist", "null");
-        }
-        Artist artist = artistRepository.findById(artwork.getArtist().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Artist", artwork.getArtist().getId()));
-        artwork.setArtist(artist);
-    }
-
-    // ================= Пагінація та фільтрація =================
-    public ArtworkListResponse getPaginatedArtworks(ArtworkListRequest request) {
+    // Pagination & Filtering
+    public PagedResponseDTO<ArtworkShortDTO> getPaginatedArtworksDTO(ArtworkListRequestDTO request) {
         int page = Math.max(request.getPage(), 0);
         int size = request.getSize() > 0 ? request.getSize() : 20;
         PageRequest pageRequest = PageRequest.of(page, size);
 
         Page<Artwork> pageResult = artworkRepository.findAll(buildSpecification(request), pageRequest);
 
-        List<ArtworkShortDTO> shortList = pageResult.getContent().stream()
-                .map(a -> new ArtworkShortDTO(a.getId(), a.getTitle(), a.getArtist().getName()))
-                .collect(Collectors.toList());
-
-        return new ArtworkListResponse(shortList, pageResult.getTotalPages());
+        return PagedResponseDTO.<ArtworkShortDTO>builder()
+                .items(pageResult.getContent().stream().map(ArtworkMapper::toShortDTO).toList())
+                .totalPages(pageResult.getTotalPages())
+                .totalItems(pageResult.getTotalElements())
+                .build();
     }
 
-    public List<Artwork> getFilteredArtworks(ArtworkListRequest request) {
-        return artworkRepository.findAll(buildSpecification(request));
-    }
-
-    private Specification<Artwork> buildSpecification(ArtworkListRequest request) {
+    private Specification<Artwork> buildSpecification(ArtworkListRequestDTO request) {
         return (root, query, cb) -> {
             Predicate predicate = cb.conjunction();
             if (request.getArtistId() != null) {

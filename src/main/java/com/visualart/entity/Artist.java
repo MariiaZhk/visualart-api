@@ -1,27 +1,17 @@
 package com.visualart.entity;
 
 import java.util.List;
-
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
-@Table(name = "artist")
+@Table(name = "artist", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+//Entity
 public class Artist {
 
     @Id
@@ -32,9 +22,7 @@ public class Artist {
     private String name;
 
     private Integer birthYear;
-
     private Integer deathYear;
-
     private String nationality;
 
     @ElementCollection

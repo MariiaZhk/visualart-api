@@ -1,14 +1,13 @@
 package com.visualart.dto;
 
 import java.util.List;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-
-// Generic DTO для списку з пагінацією
+//DTO
 @Data
-@AllArgsConstructor
+@Builder
 public class PagedResponseDTO<T> {
     private List<T> items;
     private int totalPages;
-    private long totalItems; // опціонально, якщо потрібна кількість записів
+    private long totalItems;
 }

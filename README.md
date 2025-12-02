@@ -29,7 +29,7 @@ mvn clean package
 3. Запустіть Docker Compose:
 
 ```bash
-docker compose up --build
+docker-compose up --build
 ```
 
 - **API:** `http://localhost:8080`

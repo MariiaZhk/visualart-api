@@ -1,7 +1,7 @@
 package com.visualart.dto;
 
 import lombok.Data;
-
+//DTO
 @Data
 public class ArtworkListRequestDTO {
     private Long artistId;
