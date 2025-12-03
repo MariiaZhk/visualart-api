@@ -15,4 +15,3 @@ public interface ArtistRepository extends JpaRepository<Artist, Long> {
 
     boolean existsByName(String name);
 }
-//Rpo

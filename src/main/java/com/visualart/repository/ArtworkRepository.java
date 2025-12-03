@@ -10,4 +10,3 @@ import com.visualart.entity.Artwork;
 public interface ArtworkRepository extends JpaRepository<Artwork, Long>, JpaSpecificationExecutor<Artwork> {
    
 }
-//Rpo

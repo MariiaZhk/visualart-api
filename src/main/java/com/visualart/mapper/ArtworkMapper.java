@@ -4,18 +4,20 @@ import com.visualart.dto.*;
 import com.visualart.entity.Artist;
 import com.visualart.entity.Artwork;
 
+import java.util.List;
+
 public class ArtworkMapper {
 
     public static ArtworkResponseDTO toDTO(Artwork artwork) {
         if (artwork == null) return null;
-        return ArtworkResponseDTO.builder()
-                .id(artwork.getId())
-                .title(artwork.getTitle())
-                .yearCreated(artwork.getYearCreated())
-                .genres(artwork.getGenres())
-                .media(artwork.getMedia())
-                .artist(ArtistMapper.toResponseDTO(artwork.getArtist()))
-                .build();
+        return new ArtworkResponseDTO(
+                artwork.getId(),
+                artwork.getTitle(),
+                artwork.getYearCreated(),
+                artwork.getGenres() == null ? List.of() : artwork.getGenres(),
+                artwork.getMedia() == null ? List.of() : artwork.getMedia(),
+                ArtistMapper.toDTO(artwork.getArtist())
+        );
     }
 
     public static ArtworkShortDTO toShortDTO(Artwork artwork) {
@@ -27,23 +29,14 @@ public class ArtworkMapper {
         );
     }
 
-    public static Artwork fromRequestDTO(ArtworkRequestDTO dto, Artist artist) {
+    public static Artwork fromDTO(ArtworkRequestDTO dto, Artist artist) {
         if (dto == null || artist == null) return null;
         return Artwork.builder()
-                .title(dto.getTitle())
-                .yearCreated(dto.getYearCreated())
-                .genres(dto.getGenres())
-                .media(dto.getMedia())
+                .title(dto.title())
+                .yearCreated(dto.yearCreated())
+                .genres(dto.genres() == null ? List.of() : dto.genres())
+                .media(dto.media() == null ? List.of() : dto.media())
                 .artist(artist)
                 .build();
     }
-
-    public static void updateEntity(Artwork artwork, ArtworkRequestDTO dto, Artist artist) {
-        artwork.setTitle(dto.getTitle());
-        artwork.setYearCreated(dto.getYearCreated());
-        artwork.setGenres(dto.getGenres());
-        artwork.setMedia(dto.getMedia());
-        artwork.setArtist(artist);
-    }
 }
-//Mapper

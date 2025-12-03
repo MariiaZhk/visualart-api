@@ -1,8 +1,9 @@
 package com.visualart.entity;
 
-import java.util.List;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "artist", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
@@ -11,7 +12,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-//Entity
 public class Artist {
 
     @Id

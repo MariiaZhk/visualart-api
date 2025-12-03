@@ -5,4 +5,3 @@ public class ResourceNotFoundException extends RuntimeException {
         super(resourceName + " not found with id " + identifier);
     }
 }
-//Exception

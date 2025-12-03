@@ -1,9 +1,10 @@
 package com.visualart.entity;
 
-import java.util.List;
 import jakarta.persistence.*;
 import lombok.*;
-//Entity
+
+import java.util.List;
+
 @Entity
 @Table(name = "artwork")
 @Getter
