@@ -35,14 +35,7 @@ public class ArtworkService {
     private final ArtistRepository artistRepository;
     private final ObjectMapper objectMapper;
 
-    // ---------------- CREATE ----------------
     public ArtworkResponseDTO createArtwork(ArtworkRequestDTO dto) {
-        log.info("Creating artwork '{}', artistId={}", dto.title(), dto.artistId());
-
-        if (dto.artistId() == null) {
-            throw new IllegalArgumentException("artistId must not be null");
-        }
-
         Artist artist = artistRepository.findById(dto.artistId())
                 .orElseThrow(() -> new ResourceNotFoundException("Artist", dto.artistId()));
 
@@ -50,42 +43,35 @@ public class ArtworkService {
         return ArtworkMapper.toDTO(artworkRepository.save(artwork));
     }
 
-    // ---------------- READ ----------------
     public ArtworkResponseDTO getArtworkById(Long id) {
         Artwork artwork = artworkRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Artwork", id));
         return ArtworkMapper.toDTO(artwork);
     }
 
-    // ---------------- UPDATE ----------------
-    public ArtworkResponseDTO updateArtwork(Long id, ArtworkRequestDTO dto) {
-        Artwork artwork = artworkRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Artwork", id));
+public ArtworkResponseDTO updateArtwork(Long id, ArtworkRequestDTO dto) {
+    Artwork artwork = artworkRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Artwork", id));
 
-        if (dto.artistId() == null) {
-            throw new IllegalArgumentException("artistId must not be null");
-        }
+    Artist artist = artistRepository.findById(dto.artistId())
+            .orElseThrow(() -> new ResourceNotFoundException("Artist", dto.artistId()));
 
-        Artist artist = artistRepository.findById(dto.artistId())
-                .orElseThrow(() -> new ResourceNotFoundException("Artist", dto.artistId()));
+    artwork.setTitle(dto.title());
+    artwork.setYearCreated(dto.yearCreated());
+    // genres може бути null
+    artwork.setGenres(dto.genres() != null ? dto.genres() : List.of());
+    artwork.setArtist(artist);
 
-        artwork.setTitle(dto.title());
-        artwork.setYearCreated(dto.yearCreated());
-        artwork.setGenres(dto.genres() != null ? dto.genres() : List.of());
-        artwork.setMedia(dto.media() != null ? dto.media() : List.of());
-        artwork.setArtist(artist);
+    return ArtworkMapper.toDTO(artworkRepository.save(artwork));
+}
 
-        return ArtworkMapper.toDTO(artworkRepository.save(artwork));
-    }
 
-    // ---------------- DELETE ----------------
     public void deleteArtwork(Long id) {
         Artwork artwork = artworkRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Artwork", id));
         artworkRepository.delete(artwork);
     }
 
-    // ---------------- PAGINATION + FILTERING ----------------
     public PagedResponseDTO<ArtworkShortDTO> getPaginatedArtworksDTO(ArtworkListRequestDTO request) {
         int page = Math.max(request.page(), 0);
         int size = request.size() > 0 ? request.size() : 20;
@@ -113,15 +99,10 @@ public class ArtworkService {
                 predicate = cb.and(predicate,
                         cb.isMember(request.genre(), root.get("genres")));
             }
-            if (request.media() != null) {
-                predicate = cb.and(predicate,
-                        cb.isMember(request.media(), root.get("media")));
-            }
             return predicate;
         };
     }
 
-    // ---------------- CSV REPORT ----------------
     public byte[] generateCsvReport(ArtworkListRequestDTO request) throws IOException {
         List<ArtworkResponseDTO> artworks = getPaginatedArtworksDTO(request).items().stream()
                 .map(artwork -> getArtworkById(artwork.id()))
@@ -129,23 +110,21 @@ public class ArtworkService {
 
         StringWriter writer = new StringWriter();
         try (CSVWriter csvWriter = new CSVWriter(writer)) {
-            csvWriter.writeNext(new String[]{"ID", "Title", "Artist", "Year Created", "Genres", "Media"});
-            for (ArtworkResponseDTO a : artworks) {
-                csvWriter.writeNext(new String[]{
-                        String.valueOf(a.id()),
-                        a.title(),
-                        a.artist().name(),
-                        String.valueOf(a.yearCreated()),
-                        a.genres() != null ? String.join("|", a.genres()) : "",
-                        a.media() != null ? String.join("|", a.media()) : ""
-                });
-            }
+           csvWriter.writeNext(new String[]{"ID", "Title", "Artist", "Year Created", "Genres"});
+for (ArtworkResponseDTO a : artworks) {
+    csvWriter.writeNext(new String[]{
+        String.valueOf(a.id()),
+        a.title(),
+        a.artist().name(),
+        String.valueOf(a.yearCreated()),
+        a.genres() != null ? String.join("|", a.genres()) : ""
+    });
+}
         }
 
         return writer.toString().getBytes(StandardCharsets.UTF_8);
     }
 
-    // ---------------- UPLOAD JSON ----------------
     public UploadResponseDTO uploadFromJson(MultipartFile file) throws IOException {
         int success = 0;
         int failed = 0;

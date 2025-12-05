@@ -7,6 +7,5 @@ public record ArtworkResponseDTO(
         String title,
         Integer yearCreated,
         List<String> genres,
-        List<String> media,
         ArtistResponseDTO artist
 ) {}

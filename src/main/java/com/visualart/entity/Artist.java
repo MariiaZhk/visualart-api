@@ -3,10 +3,8 @@ package com.visualart.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Entity
-@Table(name = "artist", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
+@Table(name = "artists", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,18 +18,4 @@ public class Artist {
 
     @Column(nullable = false, unique = true)
     private String name;
-
-    private Integer birthYear;
-    private Integer deathYear;
-    private String nationality;
-
-    @ElementCollection
-    @CollectionTable(name = "artist_fields", joinColumns = @JoinColumn(name = "artist_id"))
-    @Column(name = "field")
-    private List<String> fields;
-
-    @ElementCollection
-    @CollectionTable(name = "artist_schools", joinColumns = @JoinColumn(name = "artist_id"))
-    @Column(name = "school")
-    private List<String> affiliatedSchools;
 }

@@ -8,5 +8,5 @@ import com.visualart.entity.Artwork;
 
 @Repository
 public interface ArtworkRepository extends JpaRepository<Artwork, Long>, JpaSpecificationExecutor<Artwork> {
-   
+
 }

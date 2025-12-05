@@ -15,7 +15,6 @@ public class ArtworkMapper {
                 artwork.getTitle(),
                 artwork.getYearCreated(),
                 artwork.getGenres() == null ? List.of() : artwork.getGenres(),
-                artwork.getMedia() == null ? List.of() : artwork.getMedia(),
                 ArtistMapper.toDTO(artwork.getArtist())
         );
     }
@@ -35,7 +34,6 @@ public class ArtworkMapper {
                 .title(dto.title())
                 .yearCreated(dto.yearCreated())
                 .genres(dto.genres() == null ? List.of() : dto.genres())
-                .media(dto.media() == null ? List.of() : dto.media())
                 .artist(artist)
                 .build();
     }

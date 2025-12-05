@@ -24,7 +24,6 @@ public class ArtistService {
     public ArtistResponseDTO createArtist(ArtistRequestDTO dto) {
         log.info("Creating artist with name '{}'", dto.name());
         if (artistRepository.existsByName(dto.name())) {
-            log.warn("Artist creation failed, name '{}' already exists", dto.name());
             throw new IllegalArgumentException("Artist with this name already exists");
         }
 
@@ -49,12 +48,6 @@ public class ArtistService {
                 .orElseThrow(() -> new ResourceNotFoundException("Artist", id));
 
         artist.setName(dto.name());
-        artist.setBirthYear(dto.birthYear());
-        artist.setDeathYear(dto.deathYear());
-        artist.setNationality(dto.nationality());
-        artist.setFields(dto.fields() != null ? dto.fields() : List.of());
-        artist.setAffiliatedSchools(dto.affiliatedSchools() != null ? dto.affiliatedSchools() : List.of());
-
         return ArtistMapper.toDTO(artistRepository.save(artist));
     }
 

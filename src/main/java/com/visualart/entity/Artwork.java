@@ -6,7 +6,7 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Table(name = "artwork")
+@Table(name = "artworks")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,17 +21,13 @@ public class Artwork {
     @Column(nullable = false)
     private String title;
 
+    @Column(name = "year_created")
     private Integer yearCreated;
 
     @ElementCollection
     @CollectionTable(name = "artwork_genres", joinColumns = @JoinColumn(name = "artwork_id"))
     @Column(name = "genre")
     private List<String> genres;
-
-    @ElementCollection
-    @CollectionTable(name = "artwork_media", joinColumns = @JoinColumn(name = "artwork_id"))
-    @Column(name = "media")
-    private List<String> media;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "artist_id", nullable = false)

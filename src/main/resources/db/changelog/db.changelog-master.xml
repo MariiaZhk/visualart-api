@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <!-- ===================================================
+         1. TABLE: artists + initial data
+    ====================================================== -->
+    <changeSet id="1" author="admin">
+        <createTable tableName="artists">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <!-- Initial artists -->
+        <insert tableName="artists"><column name="name" value="Vincent van Gogh"/></insert>
+        <insert tableName="artists"><column name="name" value="Claude Monet"/></insert>
+        <insert tableName="artists"><column name="name" value="Leonardo da Vinci"/></insert>
+        <insert tableName="artists"><column name="name" value="Pablo Picasso"/></insert>
+        <insert tableName="artists"><column name="name" value="Rembrandt"/></insert>
+        <insert tableName="artists"><column name="name" value="Michelangelo"/></insert>
+        <insert tableName="artists"><column name="name" value="Edvard Munch"/></insert>
+        <insert tableName="artists"><column name="name" value="Johannes Vermeer"/></insert>
+        <insert tableName="artists"><column name="name" value="Frida Kahlo"/></insert>
+        <insert tableName="artists"><column name="name" value="Georgia O'Keeffe"/></insert>
+    </changeSet>
+
+
+    <!-- ===================================================
+         2. TABLE: artworks
+    ====================================================== -->
+    <changeSet id="2" author="admin">
+        <createTable tableName="artworks">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="year_created" type="INT"/>
+
+            <column name="artist_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="artworks"
+                baseColumnNames="artist_id"
+                referencedTableName="artists"
+                referencedColumnNames="id"
+                constraintName="fk_artworks_artists"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+
+    <!-- ===================================================
+         3. TABLE: artwork_genres
+    ====================================================== -->
+    <changeSet id="3" author="admin">
+        <createTable tableName="artwork_genres">
+            <column name="artwork_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="genre" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="artwork_genres"
+                baseColumnNames="artwork_id"
+                referencedTableName="artworks"
+                referencedColumnNames="id"
+                constraintName="fk_artwork_genres_artwork"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+
+    <!-- ===================================================
+         4. TABLE: artwork_media
+    ====================================================== -->
+    <changeSet id="4" author="admin">
+        <createTable tableName="artwork_media">
+            <column name="artwork_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="media" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="artwork_media"
+                baseColumnNames="artwork_id"
+                referencedTableName="artworks"
+                referencedColumnNames="id"
+                constraintName="fk_artwork_media_artwork"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Starry Night",
+    "yearCreated": 1889,
+    "genres": ["Post-Impressionism"],
+    "media": ["Oil on canvas"],
+    "artistId": 1
+  },
+  {
+    "title": "Water Lilies",
+    "yearCreated": 1916,
+    "genres": ["Impressionism"],
+    "media": ["Oil on canvas"],
+    "artistId": 2
+  },
+  {
+    "title": "Mona Lisa",
+    "yearCreated": 1503,
+    "genres": ["Renaissance"],
+    "media": ["Oil on poplar"],
+    "artistId": 3
+  },
+  {
+    "title": "Guernica",
+    "yearCreated": 1937,
+    "genres": ["Cubism", "Political Art"],
+    "media": ["Oil on canvas"],
+    "artistId": 4
+  },
+  {
+    "title": "The Night Watch",
+    "yearCreated": 1642,
+    "genres": ["Baroque"],
+    "media": ["Oil on canvas"],
+    "artistId": 5
+  },
+  {
+    "title": "The Creation of Adam",
+    "yearCreated": 1512,
+    "genres": ["Renaissance"],
+    "media": ["Fresco"],
+    "artistId": 6
+  },
+  {
+    "title": "The Scream",
+    "yearCreated": 1893,
+    "genres": ["Expressionism"],
+    "media": ["Oil, tempera, pastel"],
+    "artistId": 7
+  },
+  {
+    "title": "Girl with a Pearl Earring",
+    "yearCreated": 1665,
+    "genres": ["Baroque"],
+    "media": ["Oil on canvas"],
+    "artistId": 8
+  },
+  {
+    "title": "The Two Fridas",
+    "yearCreated": 1939,
+    "genres": ["Surrealism"],
+    "media": ["Oil on canvas"],
+    "artistId": 9
+  },
+  {
+    "title": "Black Iris",
+    "yearCreated": 1926,
+    "genres": ["Modernism", "Floral"],
+    "media": ["Oil on canvas"],
+    "artistId": 10
+  }
+]

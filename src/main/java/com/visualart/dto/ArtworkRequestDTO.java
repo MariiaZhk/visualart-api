@@ -9,7 +9,6 @@ public record ArtworkRequestDTO(
         String title,
         Integer yearCreated,
         List<String> genres,
-        List<String> media,
         @NotNull(message = "Artist ID is required")
         Long artistId
 ) {}

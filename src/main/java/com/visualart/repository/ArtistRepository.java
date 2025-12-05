@@ -10,7 +10,6 @@ import com.visualart.entity.Artist;
 @Repository
 public interface ArtistRepository extends JpaRepository<Artist, Long> {
 
-  
     Optional<Artist> findByName(String name);
 
     boolean existsByName(String name);

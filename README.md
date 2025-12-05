@@ -9,49 +9,25 @@ REST API для VisualArt Application на Spring Boot з PostgreSQL.
 - Java 17
 - Spring Boot 3
 - PostgreSQL
-- Docker / Docker Compose
 - Maven
 - Lombok
 - Liquibase
 
 ---
 
-## 🚀 Швидкий старт (Docker)
+## 🚀 Запуск проєкту
 
-> Рекомендований спосіб запуску
+> Має бути встановлений PostgreSQL і створена БД `visualartdb`.
 
 1️⃣ Клонуйте репозиторій:
 
 ```bash
 git clone https://github.com/MariiaZhk/visualart-api-SpringBootRestApi.git
 cd visualart-api-SpringBootRestApi
-```
-
-2️⃣ Запустіть застосунок та базу даних:
-
-```bash
-docker-compose up --build
-```
-
-📌 Після запуску API доступне на:
 
 ```
-http://localhost:8080
-```
 
-3️⃣ Зупинка та видалення контейнерів:
-
-```bash
-docker compose down -v
-```
-
----
-
-## 🛠 Альтернативний запуск (без Docker)
-
-> Має бути встановлений PostgreSQL і створена БД `visualartdb`
-
-1️⃣ Збірка проєкту:
+2️⃣ Збірка проєкту:
 
 ```bash
 mvn clean package
@@ -64,6 +40,12 @@ mvn spring-boot:run
 ```
 
 ---
+
+📌 Після запуску API доступне на:
+
+```
+http://localhost:8080
+```
 
 ## 📡 API Endpoints (базовий URL)
 
