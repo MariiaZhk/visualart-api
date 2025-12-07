@@ -1,40 +1,55 @@
 package com.visualart.mapper;
 
-import com.visualart.dto.*;
+import com.visualart.dto.ArtworkRequestDTO;
+import com.visualart.dto.ArtworkResponseDTO;
+import com.visualart.dto.ArtworkShortDTO;
+import com.visualart.dto.ArtistResponseDTO;
 import com.visualart.entity.Artist;
 import com.visualart.entity.Artwork;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ArtworkMapper {
 
-    public static ArtworkResponseDTO toDTO(Artwork artwork) {
-        if (artwork == null) return null;
-        return new ArtworkResponseDTO(
-                artwork.getId(),
-                artwork.getTitle(),
-                artwork.getYearCreated(),
-                artwork.getGenres() == null ? List.of() : artwork.getGenres(),
-                ArtistMapper.toDTO(artwork.getArtist())
-        );
-    }
+    private ArtworkMapper() {}
 
-    public static ArtworkShortDTO toShortDTO(Artwork artwork) {
-        if (artwork == null || artwork.getArtist() == null) return null;
-        return new ArtworkShortDTO(
-                artwork.getId(),
-                artwork.getTitle(),
-                artwork.getArtist().getName()
-        );
-    }
+   public static ArtworkResponseDTO toDto(Artwork artwork) {
+List<String> genres = artwork.getGenres() == null ? List.of() : List.copyOf(artwork.getGenres());
 
-    public static Artwork fromDTO(ArtworkRequestDTO dto, Artist artist) {
-        if (dto == null || artist == null) return null;
-        return Artwork.builder()
-                .title(dto.title())
-                .yearCreated(dto.yearCreated())
-                .genres(dto.genres() == null ? List.of() : dto.genres())
-                .artist(artist)
-                .build();
-    }
+List<String> media = artwork.getMedia() == null ? List.of(): List.copyOf(artwork.getMedia());
+
+    return new ArtworkResponseDTO(
+            artwork.getId(),
+            artwork.getTitle(),
+            artwork.getYearCreated(),
+            genres,
+            media,
+            new ArtistResponseDTO(
+                    artwork.getArtist().getId(),
+                    artwork.getArtist().getName()
+            )
+    );
+}
+
+public static Artwork fromDTO(ArtworkRequestDTO dto, Artist artist) {
+    return Artwork.builder()
+            .title(dto.title())
+            .yearCreated(dto.yearCreated())
+          .genres(dto.genres() == null ? new ArrayList<>() : new ArrayList<>(dto.genres()))
+.media(dto.media() == null ? new ArrayList<>() : new ArrayList<>(dto.media()))
+
+            .artist(artist)
+            .build();
+}
+
+public static ArtworkShortDTO toShortDTO(Artwork artwork) {
+    return new ArtworkShortDTO(
+            artwork.getId(),
+            artwork.getTitle(),
+            artwork.getYearCreated(),
+            artwork.getArtist().getName()
+    );
+}
+
 }

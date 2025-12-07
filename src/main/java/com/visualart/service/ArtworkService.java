@@ -7,139 +7,157 @@ import com.visualart.exception.ResourceNotFoundException;
 import com.visualart.mapper.ArtworkMapper;
 import com.visualart.repository.ArtistRepository;
 import com.visualart.repository.ArtworkRepository;
-import jakarta.persistence.criteria.Predicate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVWriter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.CSVWriter;
-
-import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
+@Transactional(readOnly = true)
 public class ArtworkService {
 
     private final ArtworkRepository artworkRepository;
     private final ArtistRepository artistRepository;
     private final ObjectMapper objectMapper;
 
+    // ------------------ CREATE ------------------
+    @Transactional
     public ArtworkResponseDTO createArtwork(ArtworkRequestDTO dto) {
-        Artist artist = artistRepository.findById(dto.artistId())
-                .orElseThrow(() -> new ResourceNotFoundException("Artist", dto.artistId()));
-
+        Artist artist = getArtistOrThrow(dto.artistId());
         Artwork artwork = ArtworkMapper.fromDTO(dto, artist);
-        return ArtworkMapper.toDTO(artworkRepository.save(artwork));
+        return ArtworkMapper.toDto(artworkRepository.save(artwork));
     }
 
+    // ------------------ READ ------------------
     public ArtworkResponseDTO getArtworkById(Long id) {
-        Artwork artwork = artworkRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Artwork", id));
-        return ArtworkMapper.toDTO(artwork);
+        return ArtworkMapper.toDto(getArtworkOrThrow(id));
     }
 
-public ArtworkResponseDTO updateArtwork(Long id, ArtworkRequestDTO dto) {
-    Artwork artwork = artworkRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Artwork", id));
-
-    Artist artist = artistRepository.findById(dto.artistId())
-            .orElseThrow(() -> new ResourceNotFoundException("Artist", dto.artistId()));
-
-    artwork.setTitle(dto.title());
-    artwork.setYearCreated(dto.yearCreated());
-    // genres може бути null
-    artwork.setGenres(dto.genres() != null ? dto.genres() : List.of());
-    artwork.setArtist(artist);
-
-    return ArtworkMapper.toDTO(artworkRepository.save(artwork));
-}
-
-
-    public void deleteArtwork(Long id) {
-        Artwork artwork = artworkRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Artwork", id));
-        artworkRepository.delete(artwork);
-    }
-
-    public PagedResponseDTO<ArtworkShortDTO> getPaginatedArtworksDTO(ArtworkListRequestDTO request) {
-        int page = Math.max(request.page(), 0);
-        int size = request.size() > 0 ? request.size() : 20;
-        PageRequest pageRequest = PageRequest.of(page, size);
-
-        Page<Artwork> pageResult = artworkRepository.findAll(buildSpecification(request), pageRequest);
-
-        return new PagedResponseDTO<>(
-                pageResult.getContent().stream()
-                        .map(ArtworkMapper::toShortDTO)
-                        .toList(),
-                pageResult.getTotalPages(),
-                pageResult.getTotalElements()
+    public PagedResponseDTO<ArtworkShortDTO> getPaginatedArtworks(ArtworkListRequestDTO req) {
+        Pageable pageable = PageRequest.of(
+                Math.max(req.page(), 1) - 1,
+                req.size() <= 0 ? 20 : req.size(),
+                "desc".equalsIgnoreCase(req.sortDir())
+                        ? Sort.by(getSortField(req)).descending()
+                        : Sort.by(getSortField(req)).ascending()
         );
-    }
 
-    private Specification<Artwork> buildSpecification(ArtworkListRequestDTO request) {
-        return (root, query, cb) -> {
-            Predicate predicate = cb.conjunction();
-            if (request.artistId() != null) {
-                predicate = cb.and(predicate,
-                        cb.equal(root.get("artist").get("id"), request.artistId()));
-            }
-            if (request.genre() != null) {
-                predicate = cb.and(predicate,
-                        cb.isMember(request.genre(), root.get("genres")));
-            }
-            return predicate;
-        };
-    }
-
-    public byte[] generateCsvReport(ArtworkListRequestDTO request) throws IOException {
-        List<ArtworkResponseDTO> artworks = getPaginatedArtworksDTO(request).items().stream()
-                .map(artwork -> getArtworkById(artwork.id()))
+        Page<Artwork> pageResult = artworkRepository.findAll(buildSpecification(req), pageable);
+        List<ArtworkShortDTO> items = pageResult.getContent().stream()
+                .map(ArtworkMapper::toShortDTO)
                 .toList();
 
-        StringWriter writer = new StringWriter();
-        try (CSVWriter csvWriter = new CSVWriter(writer)) {
-           csvWriter.writeNext(new String[]{"ID", "Title", "Artist", "Year Created", "Genres"});
-for (ArtworkResponseDTO a : artworks) {
-    csvWriter.writeNext(new String[]{
-        String.valueOf(a.id()),
-        a.title(),
-        a.artist().name(),
-        String.valueOf(a.yearCreated()),
-        a.genres() != null ? String.join("|", a.genres()) : ""
-    });
-}
-        }
-
-        return writer.toString().getBytes(StandardCharsets.UTF_8);
+        return new PagedResponseDTO<>(items, pageResult.getTotalPages(), pageResult.getTotalElements());
     }
 
-    public UploadResponseDTO uploadFromJson(MultipartFile file) throws IOException {
-        int success = 0;
-        int failed = 0;
+    // ------------------ UPDATE ------------------
+    @Transactional
+    public ArtworkResponseDTO updateArtwork(Long id, ArtworkRequestDTO dto) {
+        Artwork artwork = getArtworkOrThrow(id);
+        Artist artist = getArtistOrThrow(dto.artistId());
 
-        ArtworkRequestDTO[] items = objectMapper.readValue(file.getInputStream(), ArtworkRequestDTO[].class);
-        for (ArtworkRequestDTO dto : items) {
-            try {
-                createArtwork(dto);
-                success++;
-            } catch (Exception e) {
-                failed++;
-                log.warn("Failed to import artwork '{}': {}", dto.title(), e.getMessage());
+        artwork.setTitle(dto.title());
+        artwork.setYearCreated(dto.yearCreated());
+        artwork.setGenres(dto.genres() != null ? new ArrayList<>(dto.genres()) : new ArrayList<>());
+        artwork.setMedia(dto.media() != null ? new ArrayList<>(dto.media()) : new ArrayList<>());
+        artwork.setArtist(artist);
+
+        return ArtworkMapper.toDto(artworkRepository.save(artwork));
+    }
+
+    // ------------------ DELETE ------------------
+    @Transactional
+    public void deleteArtwork(Long id) {
+        artworkRepository.delete(getArtworkOrThrow(id));
+    }
+
+    // ------------------ CSV REPORT ------------------
+    public byte[] generateCsvReport(ArtworkListRequestDTO req) {
+        List<Artwork> artworks = artworkRepository.findAll(buildSpecification(req), Sort.by("id").ascending());
+
+        try (StringWriter writer = new StringWriter(); CSVWriter csvWriter = new CSVWriter(writer)) {
+            csvWriter.writeNext(new String[]{"ID", "Title", "Artist", "Year Created", "Genres", "Media"});
+            artworks.forEach(a -> csvWriter.writeNext(new String[]{
+                    String.valueOf(a.getId()),
+                    a.getTitle(),
+                    a.getArtist() != null ? a.getArtist().getName() : "",
+                    a.getYearCreated() != null ? String.valueOf(a.getYearCreated()) : "",
+                    String.join("|", a.getGenres()),
+                    String.join("|", a.getMedia())
+            }));
+            return writer.toString().getBytes(StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            log.error("Error generating CSV report", e);
+            throw new IllegalStateException("Error generating CSV report", e);
+        }
+    }
+
+    // ------------------ UPLOAD FROM JSON ------------------
+    @Transactional
+    public UploadResponseDTO uploadFromJson(MultipartFile file) {
+        int success = 0, failed = 0;
+
+        try {
+            ArtworkRequestDTO[] items = objectMapper.readValue(file.getInputStream(), ArtworkRequestDTO[].class);
+            for (ArtworkRequestDTO dto : items) {
+                try {
+                    createArtwork(dto);
+                    success++;
+                } catch (Exception e) {
+                    log.error("Failed to import artwork '{}': {}", dto.title(), e.getMessage());
+                    failed++;
+                }
             }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid JSON file", e);
         }
 
         return new UploadResponseDTO(success, failed);
+    }
+
+    // ------------------ PRIVATE ------------------
+    private Artwork getArtworkOrThrow(Long id) {
+        return artworkRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Artwork", id));
+    }
+
+    private Artist getArtistOrThrow(Long id) {
+        return artistRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Artist", id));
+    }
+
+    private Specification<Artwork> withArtist(Long artistId) {
+        return (root, cq, cb) -> artistId == null ? null : cb.equal(root.get("artist").get("id"), artistId);
+    }
+
+    private Specification<Artwork> withTitle(String title) {
+        return (root, cq, cb) -> (title == null || title.isBlank()) ? null
+                : cb.like(cb.lower(root.get("title")), "%" + title.toLowerCase() + "%");
+    }
+
+    private Specification<Artwork> withYear(Integer year) {
+        return (root, cq, cb) -> year == null ? null : cb.equal(root.get("yearCreated"), year);
+    }
+
+    private Specification<Artwork> buildSpecification(ArtworkListRequestDTO req) {
+        return Specification.where(withArtist(req.artistId()))
+                .and(withTitle(req.title()))
+                .and(withYear(req.yearCreated()));
+    }
+
+    private String getSortField(ArtworkListRequestDTO req) {
+        return (req.sortBy() == null || req.sortBy().isBlank()) ? "id" : req.sortBy();
     }
 }

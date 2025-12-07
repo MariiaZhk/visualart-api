@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 import com.visualart.entity.Artwork;
 
 @Repository
-public interface ArtworkRepository extends JpaRepository<Artwork, Long>, JpaSpecificationExecutor<Artwork> {
+public interface ArtworkRepository extends 
+JpaRepository<Artwork, Long>, 
+JpaSpecificationExecutor<Artwork> {
 
 }

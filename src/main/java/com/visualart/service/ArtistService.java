@@ -15,42 +15,49 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 @Slf4j
+@Transactional(readOnly = true)
 public class ArtistService {
 
     private final ArtistRepository artistRepository;
 
+    @Transactional
     public ArtistResponseDTO createArtist(ArtistRequestDTO dto) {
-        log.info("Creating artist with name '{}'", dto.name());
         if (artistRepository.existsByName(dto.name())) {
             throw new IllegalArgumentException("Artist with this name already exists");
         }
-
-        Artist artist = ArtistMapper.fromDTO(dto);
-        return ArtistMapper.toDTO(artistRepository.save(artist));
+        Artist saved = artistRepository.save(ArtistMapper.fromDTO(dto));
+        return ArtistMapper.toDto(saved);
     }
 
     public ArtistResponseDTO getArtistById(Long id) {
-        Artist artist = artistRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Artist", id));
-        return ArtistMapper.toDTO(artist);
+        return ArtistMapper.toDto(
+            artistRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Artist", id))
+        );
     }
 
     public List<ArtistResponseDTO> getAllArtists() {
         return artistRepository.findAll().stream()
-                .map(ArtistMapper::toDTO)
+                .map(ArtistMapper::toDto)
                 .toList();
     }
 
+    @Transactional
     public ArtistResponseDTO updateArtist(Long id, ArtistRequestDTO dto) {
         Artist artist = artistRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Artist", id));
 
-        artist.setName(dto.name());
-        return ArtistMapper.toDTO(artistRepository.save(artist));
+        String newName = dto.name();
+        if (!artist.getName().equals(newName) && artistRepository.existsByName(newName)) {
+            throw new IllegalArgumentException("Artist with this name already exists");
+        }
+
+        artist.setName(newName);
+        return ArtistMapper.toDto(artistRepository.save(artist));
     }
 
+    @Transactional
     public void deleteArtist(Long id) {
         Artist artist = artistRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Artist", id));

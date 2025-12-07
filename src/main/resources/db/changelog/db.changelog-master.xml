@@ -5,9 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <!-- ===================================================
-         1. TABLE: artists + initial data
-    ====================================================== -->
+    <!-- 1. TABLE: artists + initial data -->
     <changeSet id="1" author="admin">
         <createTable tableName="artists">
             <column name="id" type="BIGINT" autoIncrement="true">
@@ -31,22 +29,16 @@
         <insert tableName="artists"><column name="name" value="Georgia O'Keeffe"/></insert>
     </changeSet>
 
-
-    <!-- ===================================================
-         2. TABLE: artworks
-    ====================================================== -->
+    <!-- 2. TABLE: artworks -->
     <changeSet id="2" author="admin">
         <createTable tableName="artworks">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-
             <column name="title" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-
             <column name="year_created" type="INT"/>
-
             <column name="artist_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
@@ -61,52 +53,57 @@
                 onDelete="CASCADE"/>
     </changeSet>
 
-
-    <!-- ===================================================
-         3. TABLE: artwork_genres
-    ====================================================== -->
+    <!-- 3. TABLE: artwork_genres -->
     <changeSet id="3" author="admin">
         <createTable tableName="artwork_genres">
             <column name="artwork_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
-
             <column name="genre" type="VARCHAR(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
         </createTable>
 
-        <addForeignKeyConstraint
-                baseTableName="artwork_genres"
-                baseColumnNames="artwork_id"
-                referencedTableName="artworks"
-                referencedColumnNames="id"
-                constraintName="fk_artwork_genres_artwork"
-                onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="artwork_genres"
+                                 baseColumnNames="artwork_id"
+                                 referencedTableName="artworks"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_artwork_genres"
+                                 onDelete="CASCADE"/>
     </changeSet>
 
-
-    <!-- ===================================================
-         4. TABLE: artwork_media
-    ====================================================== -->
+    <!-- 4. TABLE: artwork_media -->
     <changeSet id="4" author="admin">
         <createTable tableName="artwork_media">
             <column name="artwork_id" type="BIGINT">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
-
             <column name="media" type="VARCHAR(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" primaryKey="true"/>
             </column>
         </createTable>
 
-        <addForeignKeyConstraint
-                baseTableName="artwork_media"
-                baseColumnNames="artwork_id"
-                referencedTableName="artworks"
-                referencedColumnNames="id"
-                constraintName="fk_artwork_media_artwork"
-                onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="artwork_media"
+                                 baseColumnNames="artwork_id"
+                                 referencedTableName="artworks"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_artwork_media"
+                                 onDelete="CASCADE"/>
     </changeSet>
+    <!-- 5. Indexes for fast filtering -->
+<changeSet id="5" author="admin">
+    <createIndex tableName="artworks" indexName="idx_artworks_artist_id">
+        <column name="artist_id"/>
+    </createIndex>
+
+    <createIndex tableName="artworks" indexName="idx_artworks_title">
+        <column name="title"/>
+    </createIndex>
+
+    <createIndex tableName="artworks" indexName="idx_artworks_year_created">
+        <column name="year_created"/>
+    </createIndex>
+</changeSet>
+
 
 </databaseChangeLog>

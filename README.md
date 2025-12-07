@@ -1,10 +1,10 @@
 # VisualArt Service
 
-REST API для VisualArt Application на Spring Boot з PostgreSQL.
+REST API for the VisualArt application built with Spring Boot and PostgreSQL.
 
 ---
 
-## 📌 Технології
+## 📌 Technologies
 
 - Java 17
 - Spring Boot 3
@@ -15,62 +15,68 @@ REST API для VisualArt Application на Spring Boot з PostgreSQL.
 
 ---
 
-## 🚀 Запуск проєкту
+## 🚀 How to Run
 
-> Має бути встановлений PostgreSQL і створена БД `visualartdb`.
+> Make sure PostgreSQL is installed and a database called `visualartdb` exists.
 
-1️⃣ Клонуйте репозиторій:
+### Clone the repository
 
-```bash
-git clone https://github.com/MariiaZhk/visualart-api-SpringBootRestApi.git
+git clone https://github.com/MariiaZhk/visualart-api-SpringBootRestApi.git  
 cd visualart-api-SpringBootRestApi
 
-```
+### Build the project
 
-2️⃣ Збірка проєкту:
-
-```bash
 mvn clean package
-```
 
-2️⃣ Запуск Spring Boot:
+### Run the application
 
-```bash
 mvn spring-boot:run
-```
 
 ---
 
-📌 Після запуску API доступне на:
+## 🌐 Access URLs
 
-```
+Base URL:
+
 http://localhost:8080
-```
 
-## 📡 API Endpoints (базовий URL)
+Swagger UI:
 
-```
-http://localhost:8080/api
-```
-
-### 👨‍🎨 Artists
-
-| Метод  | Endpoint          | Опис                   |
-| ------ | ----------------- | ---------------------- |
-| POST   | /api/artists      | Створити артиста       |
-| GET    | /api/artists      | Отримати всіх артистів |
-| GET    | /api/artists/{id} | Отримати артиста за ID |
-| PUT    | /api/artists/{id} | Оновити артиста        |
-| DELETE | /api/artists/{id} | Видалити артиста       |
-
-### 🖼 Artworks
-
-| Метод  | Endpoint           | Опис                   |
-| ------ | ------------------ | ---------------------- |
-| POST   | /api/artworks      | Створити артворк       |
-| GET    | /api/artworks      | Отримати всі артворки  |
-| GET    | /api/artworks/{id} | Отримати артворк за ID |
-| PUT    | /api/artworks/{id} | Оновити артворк        |
-| DELETE | /api/artworks/{id} | Видалити артворк       |
+http://localhost:8080/swagger-ui.html
 
 ---
+
+## 📡 API Base Path
+
+http://localhost:8080/api
+
+---
+
+## 👨‍🎨 Artists Endpoints
+
+| Method | Endpoint          | Description         |
+| ------ | ----------------- | ------------------- |
+| POST   | /api/artists      | Create a new artist |
+| GET    | /api/artists      | Get all artists     |
+| GET    | /api/artists/{id} | Get artist by ID    |
+| PUT    | /api/artists/{id} | Update artist       |
+| DELETE | /api/artists/{id} | Delete artist       |
+
+---
+
+## 🖼 Artworks Endpoints
+
+| Method | Endpoint           | Description          |
+| ------ | ------------------ | -------------------- |
+| POST   | /api/artworks      | Create a new artwork |
+| GET    | /api/artworks      | Get all artworks     |
+| GET    | /api/artworks/{id} | Get artwork by ID    |
+| PUT    | /api/artworks/{id} | Update artwork       |
+| DELETE | /api/artworks/{id} | Delete artwork       |
+
+---
+
+## 🧪 Notes
+
+This project uses Liquibase for database migrations and PostgreSQL as the main database.  
+You can test all endpoints using Swagger UI.
