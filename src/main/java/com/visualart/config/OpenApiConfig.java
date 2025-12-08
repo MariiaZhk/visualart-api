@@ -28,8 +28,6 @@ public class OpenApiConfig {
                                 To quickly test the API, upload a JSON file with artworks:  
                                 `POST http://localhost:8080/api/artworks/upload`  
 
-                                Once uploaded, you can browse and manipulate artworks and artists using the endpoints documented here.  
-
                                 Use this interface to explore the API and interact with the system directly.  
                                 Happy painting! 🖌️
                                 """)
