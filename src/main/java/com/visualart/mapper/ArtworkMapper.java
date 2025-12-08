@@ -51,5 +51,4 @@ public static ArtworkShortDTO toShortDTO(Artwork artwork) {
             artwork.getArtist().getName()
     );
 }
-
 }
