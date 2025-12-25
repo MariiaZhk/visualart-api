@@ -63,19 +63,44 @@ public class ArtworkService {
     }
 
     // ------------------ UPDATE ------------------
+    // @Transactional
+    // public ArtworkResponseDTO updateArtwork(Long id, ArtworkRequestDTO dto) {
+    //     Artwork artwork = getArtworkOrThrow(id);
+    //     Artist artist = getArtistOrThrow(dto.artistId());
+
+    //     artwork.setTitle(dto.title());
+    //     artwork.setYearCreated(dto.yearCreated());
+    //     artwork.setGenres(dto.genres() != null ? new ArrayList<>(dto.genres()) : new ArrayList<>());
+    //     artwork.setMedia(dto.media() != null ? new ArrayList<>(dto.media()) : new ArrayList<>());
+    //     artwork.setArtist(artist);
+
+    //     return ArtworkMapper.toDto(artworkRepository.save(artwork));
+    // }
+
+
     @Transactional
-    public ArtworkResponseDTO updateArtwork(Long id, ArtworkRequestDTO dto) {
-        Artwork artwork = getArtworkOrThrow(id);
-        Artist artist = getArtistOrThrow(dto.artistId());
+public ArtworkResponseDTO updateArtwork(Long id, ArtworkRequestDTO dto) {
+    Artwork artwork = getArtworkOrThrow(id);
+    Artist artist = getArtistOrThrow(dto.artistId());
 
-        artwork.setTitle(dto.title());
-        artwork.setYearCreated(dto.yearCreated());
-        artwork.setGenres(dto.genres() != null ? new ArrayList<>(dto.genres()) : new ArrayList<>());
-        artwork.setMedia(dto.media() != null ? new ArrayList<>(dto.media()) : new ArrayList<>());
-        artwork.setArtist(artist);
+    artwork.setTitle(dto.title());
+    artwork.setYearCreated(dto.yearCreated());
+    artwork.setArtist(artist);
 
-        return ArtworkMapper.toDto(artworkRepository.save(artwork));
+    // ===== GENRES =====
+    if (dto.genres() != null) {
+        artwork.getGenres().clear();
+        artwork.getGenres().addAll(dto.genres());
     }
+
+    // ===== MEDIA =====
+    if (dto.media() != null) {
+        artwork.getMedia().clear();
+        artwork.getMedia().addAll(dto.media());
+    }
+
+    return ArtworkMapper.toDto(artwork);
+}
 
     // ------------------ DELETE ------------------
     @Transactional

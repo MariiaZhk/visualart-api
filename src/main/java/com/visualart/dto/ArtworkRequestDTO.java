@@ -1,26 +1,55 @@
 package com.visualart.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 @Schema(description = "DTO for creating or updating an artwork")
 public record ArtworkRequestDTO(
-        @NotBlank(message = "Title is required")
-        @Schema(description = "Title of the artwork", example = "Starry Night")
-        String title,
+        // @NotBlank(message = "Title is required")
+        // @Schema(description = "Title of the artwork", example = "Starry Night")
+        // String title,
 
-        @Schema(description = "Year the artwork was created", example = "1889")
+        // @Schema(description = "Year the artwork was created", example = "1889")
+        // Integer yearCreated,
+
+        // @Schema(description = "Genres of the artwork", example = "[\"Post-Impressionism\"]")
+        // List<String> genres,
+
+        // @NotNull(message = "Artist ID is required")
+        // @Schema(description = "ID of the artist", example = "1")
+        // Long artistId,
+
+        // @Schema(description = "Media types used in the artwork", example = "[\"Oil on canvas\"]")
+        // List<String> media
+        @NotBlank(message = "Title is required")
+@Size(max = 100, message = "Title must be at most 100 characters")
+String title,
+
+        @NotNull(message = "Year is required")
+        @Min(value = 1, message = "Year must be positive")
+        @Max(value = 3000, message = "Year is not valid")
         Integer yearCreated,
 
-        @Schema(description = "Genres of the artwork", example = "[\"Post-Impressionism\"]")
-        List<String> genres,
 
-        @NotNull(message = "Artist ID is required")
-        @Schema(description = "ID of the artist", example = "1")
-        Long artistId,
+List<
+    @NotBlank(message = "Genre must not be blank")
+    @Size(max = 50, message = "Genre is too long")
+    String
+> genres,
 
-        @Schema(description = "Media types used in the artwork", example = "[\"Oil on canvas\"]")
-        List<String> media
+@NotNull(message = "Artist ID is required")
+@Schema(description = "ID of the artist", example = "1")
+Long artistId,
+
+List<
+    @NotBlank(message = "Media must not be blank")
+    @Size(max = 50, message = "Media is too long")
+    String
+> media
+
 ) {}

@@ -1,11 +1,26 @@
 [
   {
-    "title": "Café Terrace at Night",
+    "title": "Cafe Terrace at Night",
     "yearCreated": 1888,
     "genres": ["Post-Impressionism"],
     "media": ["Oil on canvas"],
     "artistId": 1
   },
+  {
+    "title": "Starry Night",
+    "yearCreated": 1889,
+    "genres": ["Post-Impressionism"],
+    "media": ["Oil on canvas"],
+    "artistId": 1
+  },
+  {
+    "title": "Sunflowers",
+    "yearCreated": 1888,
+    "genres": ["Post-Impressionism"],
+    "media": ["Oil on canvas"],
+    "artistId": 1
+  },
+
   {
     "title": "Water Lilies",
     "yearCreated": 1916,
@@ -14,19 +29,43 @@
     "artistId": 2
   },
   {
+    "title": "Impression, Sunrise",
+    "yearCreated": 1872,
+    "genres": ["Impressionism"],
+    "media": ["Oil on canvas"],
+    "artistId": 2
+  },
+
+  {
     "title": "Mona Lisa",
     "yearCreated": 1503,
     "genres": ["Renaissance"],
-    "media": ["Oil on poplar"],
+    "media": ["Oil on poplar panel"],
     "artistId": 3
   },
   {
+    "title": "The Last Supper",
+    "yearCreated": 1498,
+    "genres": ["Renaissance"],
+    "media": ["Tempera and oil on plaster"],
+    "artistId": 3
+  },
+
+  {
     "title": "Guernica",
     "yearCreated": 1937,
-    "genres": ["Cubism", "Political Art"],
+    "genres": ["Cubism"],
     "media": ["Oil on canvas"],
     "artistId": 4
   },
+  {
+    "title": "Les Demoiselles d'Avignon",
+    "yearCreated": 1907,
+    "genres": ["Cubism"],
+    "media": ["Oil on canvas"],
+    "artistId": 4
+  },
+
   {
     "title": "The Night Watch",
     "yearCreated": 1642,
@@ -35,6 +74,14 @@
     "artistId": 5
   },
   {
+    "title": "The Storm on the Sea of Galilee",
+    "yearCreated": 1633,
+    "genres": ["Baroque"],
+    "media": ["Oil on canvas"],
+    "artistId": 5
+  },
+
+  {
     "title": "The Creation of Adam",
     "yearCreated": 1512,
     "genres": ["Renaissance"],
@@ -42,12 +89,28 @@
     "artistId": 6
   },
   {
+    "title": "The Last Judgment",
+    "yearCreated": 1541,
+    "genres": ["Renaissance"],
+    "media": ["Fresco"],
+    "artistId": 6
+  },
+
+  {
     "title": "The Scream",
     "yearCreated": 1893,
     "genres": ["Expressionism"],
-    "media": ["Oil, tempera, pastel"],
+    "media": ["Oil, tempera, pastel on cardboard"],
     "artistId": 7
   },
+  {
+    "title": "Madonna",
+    "yearCreated": 1894,
+    "genres": ["Expressionism"],
+    "media": ["Oil on canvas"],
+    "artistId": 7
+  },
+
   {
     "title": "Girl with a Pearl Earring",
     "yearCreated": 1665,
@@ -56,6 +119,14 @@
     "artistId": 8
   },
   {
+    "title": "The Milkmaid",
+    "yearCreated": 1658,
+    "genres": ["Baroque"],
+    "media": ["Oil on canvas"],
+    "artistId": 8
+  },
+
+  {
     "title": "The Two Fridas",
     "yearCreated": 1939,
     "genres": ["Surrealism"],
@@ -63,9 +134,24 @@
     "artistId": 9
   },
   {
+    "title": "Self-Portrait with Thorn Necklace",
+    "yearCreated": 1940,
+    "genres": ["Surrealism"],
+    "media": ["Oil on canvas"],
+    "artistId": 9
+  },
+
+  {
     "title": "Black Iris",
     "yearCreated": 1926,
-    "genres": ["Modernism", "Floral"],
+    "genres": ["Modernism"],
+    "media": ["Oil on canvas"],
+    "artistId": 10
+  },
+  {
+    "title": "Jimson Weed",
+    "yearCreated": 1936,
+    "genres": ["Modernism"],
     "media": ["Oil on canvas"],
     "artistId": 10
   }
