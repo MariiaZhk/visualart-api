@@ -33,12 +33,26 @@ public class ArtworkService {
     private final ObjectMapper objectMapper;
 
     // ------------------ CREATE ------------------
-    @Transactional
-    public ArtworkResponseDTO createArtwork(ArtworkRequestDTO dto) {
-        Artist artist = getArtistOrThrow(dto.artistId());
-        Artwork artwork = ArtworkMapper.fromDTO(dto, artist);
-        return ArtworkMapper.toDto(artworkRepository.save(artwork));
+   @Transactional
+public ArtworkResponseDTO createArtwork(ArtworkRequestDTO dto) {
+    int currentYear = java.time.Year.now().getValue();
+    if (dto.yearCreated() > currentYear) {
+        throw new IllegalArgumentException("Year cannot be in the future: max " + currentYear);
     }
+    if (artworkRepository.existsByArtistIdAndTitleIgnoreCaseAndYearCreated(
+            dto.artistId(),
+            dto.title().trim(),
+            dto.yearCreated()
+    )) {
+        throw new IllegalStateException(
+                "Artwork with this title, year and artist already exists"
+        );
+    }
+    Artist artist = getArtistOrThrow(dto.artistId());
+    Artwork artwork = ArtworkMapper.fromDTO(dto, artist);
+    return ArtworkMapper.toDto(artworkRepository.save(artwork));
+}
+
 
     // ------------------ READ ------------------
     public ArtworkResponseDTO getArtworkById(Long id) {
@@ -63,44 +77,39 @@ public class ArtworkService {
     }
 
     // ------------------ UPDATE ------------------
-    // @Transactional
-    // public ArtworkResponseDTO updateArtwork(Long id, ArtworkRequestDTO dto) {
-    //     Artwork artwork = getArtworkOrThrow(id);
-    //     Artist artist = getArtistOrThrow(dto.artistId());
 
-    //     artwork.setTitle(dto.title());
-    //     artwork.setYearCreated(dto.yearCreated());
-    //     artwork.setGenres(dto.genres() != null ? new ArrayList<>(dto.genres()) : new ArrayList<>());
-    //     artwork.setMedia(dto.media() != null ? new ArrayList<>(dto.media()) : new ArrayList<>());
-    //     artwork.setArtist(artist);
-
-    //     return ArtworkMapper.toDto(artworkRepository.save(artwork));
-    // }
-
-
-    @Transactional
+@Transactional
 public ArtworkResponseDTO updateArtwork(Long id, ArtworkRequestDTO dto) {
-    Artwork artwork = getArtworkOrThrow(id);
+
+    int currentYear = java.time.Year.now().getValue();
+    if (dto.yearCreated() > currentYear) {
+        throw new IllegalArgumentException("Year cannot be in the future: max " + currentYear);
+    }
+       Artwork artwork = getArtworkOrThrow(id);
+
+    if (artworkRepository.existsByArtistIdAndTitleIgnoreCaseAndYearCreatedAndIdNot(
+            dto.artistId(),
+            dto.title().trim(),
+            dto.yearCreated(),
+            id
+    )) {
+        throw new IllegalStateException(
+                "Artwork with this title, year and artist already exists"
+        );
+    }
+
     Artist artist = getArtistOrThrow(dto.artistId());
 
-    artwork.setTitle(dto.title());
+    artwork.setTitle(dto.title().trim());
     artwork.setYearCreated(dto.yearCreated());
     artwork.setArtist(artist);
 
-    // ===== GENRES =====
-    if (dto.genres() != null) {
-        artwork.getGenres().clear();
-        artwork.getGenres().addAll(dto.genres());
-    }
-
-    // ===== MEDIA =====
-    if (dto.media() != null) {
-        artwork.getMedia().clear();
-        artwork.getMedia().addAll(dto.media());
-    }
+    artwork.setGenres(dto.genres() != null ? new ArrayList<>(dto.genres()) : new ArrayList<>());
+    artwork.setMedia(dto.media() != null ? new ArrayList<>(dto.media()) : new ArrayList<>());
 
     return ArtworkMapper.toDto(artwork);
 }
+
 
     // ------------------ DELETE ------------------
     @Transactional

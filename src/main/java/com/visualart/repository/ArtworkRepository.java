@@ -10,5 +10,18 @@ import com.visualart.entity.Artwork;
 public interface ArtworkRepository extends 
 JpaRepository<Artwork, Long>, 
 JpaSpecificationExecutor<Artwork> {
+    boolean existsByArtistIdAndTitleIgnoreCaseAndYearCreated(
+        Long artistId,
+        String title,
+        Integer yearCreated
+);
+
+boolean existsByArtistIdAndTitleIgnoreCaseAndYearCreatedAndIdNot(
+        Long artistId,
+        String title,
+        Integer yearCreated,
+        Long id
+);
+
 
 }

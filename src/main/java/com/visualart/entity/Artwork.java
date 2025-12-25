@@ -7,7 +7,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "artworks")
+@Table(
+    name = "artworks",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_artwork_artist_title_year",
+            columnNames = {"artist_id", "title", "year_created"}
+        )
+    }
+)
 @Getter
 @Setter
 @NoArgsConstructor
