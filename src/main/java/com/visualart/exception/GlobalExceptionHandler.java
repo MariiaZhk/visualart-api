@@ -1,6 +1,7 @@
 package com.visualart.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -43,6 +44,35 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "Validation failed", errors);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex, WebRequest request) {
+        log.error("Conflict: {}", ex.getMessage());
+
+        Map<String, String> errors = null;
+
+        if (ex.getMessage() != null && ex.getMessage().contains("artwork with this title")) {
+            errors = Map.of("title", ex.getMessage());
+        }
+
+        return buildResponse(HttpStatus.CONFLICT, "Validation failed", errors);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex, WebRequest request) {
+        log.error("Data integrity violation", ex);
+
+        Map<String, String> errors = null;
+        Throwable cause = ex.getMostSpecificCause();
+        if (cause != null && cause.getMessage() != null) {
+            String lowerMsg = cause.getMessage().toLowerCase();
+            if (lowerMsg.contains("uk_artwork_artist_title")) {
+                errors = Map.of("title", "This artist already has artwork with this title");
+            }
+        }
+
+        return buildResponse(HttpStatus.CONFLICT, "Validation failed", errors);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleAll(Exception ex, WebRequest request) {
         log.error("Unexpected error occurred", ex);
@@ -55,9 +85,10 @@ public class GlobalExceptionHandler {
         body.put("status", status.value());
         body.put("error", status.getReasonPhrase());
         body.put("message", message);
-        if (errors != null) {
+        if (errors != null && !errors.isEmpty()) {
             body.put("errors", errors);
         }
         return ResponseEntity.status(status).body(body);
     }
 }
+

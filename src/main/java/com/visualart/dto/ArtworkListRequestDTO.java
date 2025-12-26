@@ -1,6 +1,7 @@
 package com.visualart.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
 
 @Schema(description = "Request DTO for artworks list with filters and pagination")
 public record ArtworkListRequestDTO(
@@ -16,6 +17,7 @@ public record ArtworkListRequestDTO(
         @Schema(description = "Page number (1-based)", example = "1")
         int page,
 
+        @Max(value = 100, message = "Page size cannot exceed 100")
         @Schema(description = "Page size", example = "20")
         int size,
 

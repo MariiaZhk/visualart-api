@@ -33,83 +33,78 @@ public class ArtworkService {
     private final ObjectMapper objectMapper;
 
     // ------------------ CREATE ------------------
-   @Transactional
+@Transactional
 public ArtworkResponseDTO createArtwork(ArtworkRequestDTO dto) {
     int currentYear = java.time.Year.now().getValue();
     if (dto.yearCreated() > currentYear) {
         throw new IllegalArgumentException("Year cannot be in the future: max " + currentYear);
     }
-    if (artworkRepository.existsByArtistIdAndTitleIgnoreCaseAndYearCreated(
-            dto.artistId(),
-            dto.title().trim(),
-            dto.yearCreated()
-    )) {
+
+    Artist artist = getArtistOrThrow(dto.artistId());
+    String normalizedTitle = dto.title().trim();
+
+    if (artworkRepository.existsByArtistIdAndTitleIgnoreCase(artist.getId(), normalizedTitle)) {
         throw new IllegalStateException(
-                "Artwork with this title, year and artist already exists"
+                "This artist already has artwork with this title"
         );
     }
-    Artist artist = getArtistOrThrow(dto.artistId());
+
     Artwork artwork = ArtworkMapper.fromDTO(dto, artist);
     return ArtworkMapper.toDto(artworkRepository.save(artwork));
 }
-
-
     // ------------------ READ ------------------
     public ArtworkResponseDTO getArtworkById(Long id) {
         return ArtworkMapper.toDto(getArtworkOrThrow(id));
     }
 
-    public PagedResponseDTO<ArtworkShortDTO> getPaginatedArtworks(ArtworkListRequestDTO req) {
-        Pageable pageable = PageRequest.of(
-                Math.max(req.page(), 1) - 1,
-                req.size() <= 0 ? 20 : req.size(),
-                "desc".equalsIgnoreCase(req.sortDir())
-                        ? Sort.by(getSortField(req)).descending()
-                        : Sort.by(getSortField(req)).ascending()
-        );
+   public PagedResponseDTO<ArtworkShortDTO> getPaginatedArtworks(ArtworkListRequestDTO req) {
 
-        Page<Artwork> pageResult = artworkRepository.findAll(buildSpecification(req), pageable);
-        List<ArtworkShortDTO> items = pageResult.getContent().stream()
-                .map(ArtworkMapper::toShortDTO)
-                .toList();
+    int pageSize = Math.min(req.size() <= 0 ? 20 : req.size(), 100);
 
-        return new PagedResponseDTO<>(items, pageResult.getTotalPages(), pageResult.getTotalElements());
-    }
+    Pageable pageable = PageRequest.of(
+            Math.max(req.page(), 1) - 1,
+            pageSize,
+            "desc".equalsIgnoreCase(req.sortDir())
+                    ? Sort.by(getSortField(req)).descending()
+                    : Sort.by(getSortField(req)).ascending()
+    );
+
+    Page<Artwork> pageResult = artworkRepository.findAll(buildSpecification(req), pageable);
+    List<ArtworkShortDTO> items = pageResult.getContent().stream()
+            .map(ArtworkMapper::toShortDTO)
+            .toList();
+
+    return new PagedResponseDTO<>(items, pageResult.getTotalPages(), pageResult.getTotalElements());
+}
 
     // ------------------ UPDATE ------------------
 
 @Transactional
 public ArtworkResponseDTO updateArtwork(Long id, ArtworkRequestDTO dto) {
-
     int currentYear = java.time.Year.now().getValue();
     if (dto.yearCreated() > currentYear) {
         throw new IllegalArgumentException("Year cannot be in the future: max " + currentYear);
     }
-       Artwork artwork = getArtworkOrThrow(id);
 
-    if (artworkRepository.existsByArtistIdAndTitleIgnoreCaseAndYearCreatedAndIdNot(
-            dto.artistId(),
-            dto.title().trim(),
-            dto.yearCreated(),
-            id
-    )) {
+    Artwork artwork = getArtworkOrThrow(id);
+    Artist artist = getArtistOrThrow(dto.artistId());
+    String normalizedTitle = dto.title().trim();
+
+
+    if (artworkRepository.existsByArtistIdAndTitleIgnoreCaseAndIdNot(artist.getId(), normalizedTitle, id)) {
         throw new IllegalStateException(
-                "Artwork with this title, year and artist already exists"
+                "This artist already has artwork with this title"
         );
     }
 
-    Artist artist = getArtistOrThrow(dto.artistId());
-
-    artwork.setTitle(dto.title().trim());
+    artwork.setTitle(normalizedTitle);
     artwork.setYearCreated(dto.yearCreated());
     artwork.setArtist(artist);
-
     artwork.setGenres(dto.genres() != null ? new ArrayList<>(dto.genres()) : new ArrayList<>());
     artwork.setMedia(dto.media() != null ? new ArrayList<>(dto.media()) : new ArrayList<>());
 
     return ArtworkMapper.toDto(artwork);
 }
-
 
     // ------------------ DELETE ------------------
     @Transactional
@@ -139,27 +134,33 @@ public ArtworkResponseDTO updateArtwork(Long id, ArtworkRequestDTO dto) {
     }
 
     // ------------------ UPLOAD FROM JSON ------------------
-    @Transactional
-    public UploadResponseDTO uploadFromJson(MultipartFile file) {
-        int success = 0, failed = 0;
+@Transactional
+public UploadResponseDTO uploadFromJson(MultipartFile file) {
+    int success = 0, failed = 0;
 
-        try {
-            ArtworkRequestDTO[] items = objectMapper.readValue(file.getInputStream(), ArtworkRequestDTO[].class);
-            for (ArtworkRequestDTO dto : items) {
-                try {
-                    createArtwork(dto);
-                    success++;
-                } catch (Exception e) {
-                    log.error("Failed to import artwork '{}': {}", dto.title(), e.getMessage());
-                    failed++;
-                }
-            }
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid JSON file", e);
-        }
-
-        return new UploadResponseDTO(success, failed);
+    String contentType = file.getContentType();
+    if (!"application/json".equals(contentType) && !file.getOriginalFilename().endsWith(".json")) {
+        throw new IllegalArgumentException("Invalid file type. Only JSON files are allowed.");
     }
+
+    try {
+        ArtworkRequestDTO[] items = objectMapper.readValue(file.getInputStream(), ArtworkRequestDTO[].class);
+        for (ArtworkRequestDTO dto : items) {
+            try {
+                createArtwork(dto);
+                success++;
+            } catch (Exception e) {
+                log.error("Failed to import artwork '{}': {}", dto.title(), e.getMessage());
+                failed++;
+            }
+        }
+    } catch (Exception e) {
+        throw new IllegalArgumentException("Invalid JSON file", e);
+    }
+
+    return new UploadResponseDTO(success, failed);
+}
+
 
     // ------------------ PRIVATE ------------------
     private Artwork getArtworkOrThrow(Long id) {
